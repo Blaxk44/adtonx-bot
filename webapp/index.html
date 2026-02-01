@@ -4,200 +4,357 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AdTONX - Watch Ads, Earn TON</title>
-    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js"></script>
+    
+    <!-- Telegram WebApp -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Adexium Ads -->
-    <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
+    
+    <style>
+        /* Simple styles for mobile */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial; padding: 20px; background: #f5f7fa; }
+        .card { background: white; padding: 20px; border-radius: 10px; margin: 10px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .balance { font-size: 2em; color: #0088cc; font-weight: bold; }
+        button { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 8px; font-size: 1.1em; }
+        .btn-primary { background: #0088cc; color: white; }
+        .nav { display: flex; gap: 10px; margin: 20px 0; }
+        .nav-btn { flex: 1; padding: 10px; background: #eee; border-radius: 5px; }
+        .nav-btn.active { background: #0088cc; color: white; }
+    </style>
 </head>
 <body>
     <div id="app">
-        <div id="loading" class="screen active">
-            <div class="loading-spinner"></div>
-            <p>Loading AdTONX...</p>
+        <!-- Loading -->
+        <div id="loading" style="text-align:center; padding:50px;">
+            <h2>Loading AdTONX...</h2>
         </div>
-
-        <div id="main" class="screen">
+        
+        <!-- Main App -->
+        <div id="main" style="display:none;">
             <!-- Header -->
-            <header class="header">
-                <div class="balance-card">
-                    <h3>💰 Balance</h3>
-                    <h1 id="balance">0.00 TON</h1>
-                    <div class="balance-stats">
-                        <span>Today: <span id="todayEarnings">0.00 TON</span></span>
-                        <span>Total: <span id="totalEarned">0.00 TON</span></span>
-                    </div>
-                </div>
-            </header>
-
+            <div class="card">
+                <h3>💰 Your Balance</h3>
+                <div class="balance" id="balance">0.00 TON</div>
+                <p>Today: <span id="todayEarnings">0.00 TON</span></p>
+            </div>
+            
             <!-- Navigation -->
-            <nav class="nav">
+            <div class="nav">
                 <button class="nav-btn active" onclick="showScreen('home')">🏠 Home</button>
                 <button class="nav-btn" onclick="showScreen('ads')">📺 Ads</button>
-                <button class="nav-btn" onclick="showScreen('tasks')">🧠 Tasks</button>
-                <button class="nav-btn" onclick="showScreen('wallet')">💼 Wallet</button>
-            </nav>
-
+                <button class="nav-btn" onclick="showScreen('tasks')">✅ Tasks</button>
+                <button class="nav-btn" onclick="showScreen('wallet')">💰 Wallet</button>
+            </div>
+            
             <!-- Screens -->
-            <div class="screen-content">
-                <!-- Home Screen -->
-                <div id="home-screen" class="content active">
-                    <div class="quick-actions">
-                        <button class="action-btn" onclick="watchAd('monetag')">
-                            📺 Watch Ad<br>
-                            <small>Earn 0.005-0.08 TON</small>
-                        </button>
-                        <button class="action-btn" onclick="showScreen('tasks')">
-                            📋 Daily Tasks<br>
-                            <small>+0.25 TON Bonus</small>
-                        </button>
-                    </div>
-
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <span class="stat-label">Ads Today</span>
-                            <span class="stat-value" id="adsToday">0/3000</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-label">Earned Today</span>
-                            <span class="stat-value" id="earnedToday">0 TON</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-label">Referrals</span>
-                            <span class="stat-value" id="referralCount">0</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-label">Tasks Done</span>
-                            <span class="stat-value" id="tasksDone">0</span>
-                        </div>
-                    </div>
-
-                    <div class="announcement">
-                        <h3>📢 Announcement</h3>
-                        <p>Watch ads and complete tasks to earn TON cryptocurrency!</p>
-                    </div>
-
-                    <div class="tutorial">
-                        <h3>📚 How to Earn</h3>
-                        <ol>
-                            <li>Watch ads (3000 daily limit)</li>
-                            <li>Complete tasks for extra rewards</li>
-                            <li>Refer friends for 10% lifetime commission</li>
-                            <li>Withdraw minimum 2 TON (20% fee)</li>
-                        </ol>
-                    </div>
-                </div>
-
-                <!-- Ads Screen -->
-                <div id="ads-screen" class="content">
-                    <h3>📺 Available Ad Networks</h3>
-                    
-                    <div class="network-card">
-                        <h4>Monetag Ads</h4>
-                        <p>Reward: 0.005-0.08 TON per ad</p>
-                        <p class="small">Watch video ads and earn TON</p>
-                        <button class="btn-network" onclick="watchAd('monetag')">Watch Ad</button>
-                    </div>
-
-                    <div class="network-card">
-                        <h4>Adexium Ads</h4>
-                        <p>Reward: 0.008 TON per ad</p>
-                        <p class="small">Interactive ads with auto-play</p>
-                        <button class="btn-network" onclick="watchAd('adexium')">Watch Ad</button>
-                    </div>
-
-                    <div class="network-card">
-                        <h4>AdsGram Ads</h4>
-                        <p>Reward: 0.006 TON per ad</p>
-                        <p class="small">CPM based advertising</p>
-                        <button class="btn-network" onclick="watchAd('adsgram')">Watch Ad</button>
-                    </div>
-
-                    <div class="progress-section">
-                        <h4>🎯 Daily Progress</h4>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="dailyProgress"></div>
-                        </div>
-                        <p>Ads watched today: <span id="dailyAds">0</span>/3000</p>
-                    </div>
-                </div>
-
-                <!-- Tasks Screen -->
-                <div id="tasks-screen" class="content">
-                    <h3>🧠 Available Tasks</h3>
-                    
-                    <div id="tasksList">
-                        <!-- Tasks will load here -->
-                    </div>
-                </div>
-
-                <!-- Wallet Screen -->
-                <div id="wallet-screen" class="content">
-                    <h3>💼 Wallet</h3>
-                    
-                    <div class="wallet-info">
-                        <div class="info-card">
-                            <h4>Current Balance</h4>
-                            <h2 id="walletBalance">0.00 TON</h2>
-                        </div>
-                        
-                        <div class="info-card">
-                            <h4>Minimum Withdrawal</h4>
-                            <p>2 TON (20% fee)</p>
-                            <p class="small">You receive: 1.6 TON</p>
-                        </div>
-                    </div>
-
-                    <div class="withdrawal-form">
-                        <h4>💰 Withdraw TON</h4>
-                        <input type="text" id="walletAddress" placeholder="TON Wallet Address" class="form-input">
-                        <input type="number" id="withdrawAmount" placeholder="Amount (Min: 2 TON)" class="form-input" step="0.001" min="2">
-                        <button class="btn-withdraw" onclick="requestWithdrawal()">Request Withdrawal</button>
-                        <p class="small">Fee: 20% | Processing: 5-30 minutes</p>
-                    </div>
-
-                    <div class="transactions">
-                        <h4>📜 Recent Transactions</h4>
-                        <div id="transactionList">
-                            <p>No transactions yet</p>
-                        </div>
-                    </div>
+            <div id="home" class="screen">
+                <button class="btn-primary" onclick="watchAd()">📺 Watch Ad & Earn</button>
+                <button onclick="showScreen('tasks')">✅ Complete Tasks</button>
+                <button onclick="showScreen('wallet')">💰 Withdraw TON</button>
+            </div>
+            
+            <div id="ads" class="screen" style="display:none;">
+                <h3>Available Ads</h3>
+                <div class="card">
+                    <h4>Monetag Ad</h4>
+                    <p>Earn: 0.005-0.08 TON</p>
+                    <button class="btn-primary" onclick="watchAd('monetag')">Watch Ad</button>
                 </div>
             </div>
-        </div>
-
-        <!-- Ad Modal -->
-        <div id="adModal" class="modal">
-            <div class="modal-content">
-                <h3>📺 Watching Ad</h3>
-                <p>Please watch the ad completely to earn TON</p>
-                
-                <div id="adContainer">
-                    <!-- Ad will load here -->
-                </div>
-                
-                <div class="timer-section">
-                    <div class="timer-circle">
-                        <span id="countdown">10</span>
-                    </div>
-                    <p>Remaining: <span id="timerText">10 seconds</span></p>
-                </div>
-                
-                <button class="btn-skip" onclick="skipAd()">Skip Ad (No Reward)</button>
-                <button class="btn-complete" onclick="completeAd()" style="display:none;" id="completeBtn">Complete & Earn</button>
+            
+            <div id="tasks" class="screen" style="display:none;">
+                <h3>Available Tasks</h3>
+                <div id="tasksList"></div>
             </div>
-        </div>
-
-        <!-- Success Modal -->
-        <div id="successModal" class="modal success">
-            <div class="modal-content">
-                <h3>🎉 Congratulations!</h3>
-                <p>You earned <span id="rewardAmount">0.00</span> TON!</p>
-                <p>New balance: <span id="newBalance">0.00</span> TON</p>
-                <button class="btn-ok" onclick="closeSuccessModal()">OK</button>
+            
+            <div id="wallet" class="screen" style="display:none;">
+                <h3>Withdraw TON</h3>
+                <input type="text" id="walletAddress" placeholder="TON Wallet Address" style="width:100%; padding:10px; margin:10px 0;">
+                <input type="number" id="amount" placeholder="Amount (Min: 2 TON)" style="width:100%; padding:10px; margin:10px 0;">
+                <button class="btn-primary" onclick="withdraw()">Request Withdrawal</button>
             </div>
         </div>
     </div>
 
-    <script src="js/app.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCToNn1VqYZrZjjbbBA2KW126ZBso-0D80",
+            authDomain: "adtonx-bot.firebaseapp.com",
+            projectId: "adtonx-bot",
+            storageBucket: "adtonx-bot.firebasestorage.app",
+            messagingSenderId: "290170776005",
+            appId: "1:290170776005:web:82f88036aa42d080e2c3ac",
+            measurementId: "G-6S0F9NY64F"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        let currentUser = null;
+        
+        // Initialize app
+        async function initApp() {
+            // Initialize Telegram WebApp
+            if (typeof Telegram !== 'undefined') {
+                window.Telegram.WebApp.expand();
+                window.Telegram.WebApp.ready();
+                
+                // Get user from Telegram
+                const tgUser = Telegram.WebApp.initDataUnsafe.user;
+                
+                // Create/Get user in Firestore
+                currentUser = await getUserFromFirestore(tgUser);
+                
+                // Update UI
+                updateUI();
+                
+                // Hide loading, show app
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('main').style.display = 'block';
+            } else {
+                // Fallback for testing
+                document.getElementById('loading').innerHTML = '<h2>Please open in Telegram</h2>';
+            }
+        }
+        
+        async function getUserFromFirestore(tgUser) {
+            const userRef = db.collection('users').doc(tgUser.id.toString());
+            const doc = await userRef.get();
+            
+            if (doc.exists) {
+                return { id: doc.id, ...doc.data() };
+            } else {
+                // Create new user
+                const newUser = {
+                    telegram_id: tgUser.id,
+                    username: tgUser.username,
+                    first_name: tgUser.first_name,
+                    last_name: tgUser.last_name,
+                    balance: 0,
+                    total_earned: 0,
+                    today_earnings: 0,
+                    ads_watched: 0,
+                    tasks_completed: 0,
+                    status: 'active',
+                    created_at: new Date().toISOString(),
+                    last_active: new Date().toISOString()
+                };
+                
+                await userRef.set(newUser);
+                return { id: tgUser.id.toString(), ...newUser };
+            }
+        }
+        
+        function updateUI() {
+            if (currentUser) {
+                document.getElementById('balance').textContent = currentUser.balance.toFixed(3) + ' TON';
+                document.getElementById('todayEarnings').textContent = currentUser.today_earnings.toFixed(3) + ' TON';
+            }
+        }
+        
+        async function watchAd(adNetwork = 'monetag') {
+            try {
+                // Show ad (simulated)
+                alert('📺 Ad playing... Please wait 5 seconds');
+                
+                // Calculate reward
+                const reward = calculateAdReward(currentUser.ads_watched);
+                
+                // Update user in Firestore
+                const userRef = db.collection('users').doc(currentUser.id);
+                await userRef.update({
+                    balance: firebase.firestore.FieldValue.increment(reward),
+                    total_earned: firebase.firestore.FieldValue.increment(reward),
+                    today_earnings: firebase.firestore.FieldValue.increment(reward),
+                    ads_watched: firebase.firestore.FieldValue.increment(1),
+                    last_active: new Date().toISOString()
+                });
+                
+                // Create transaction record
+                await db.collection('transactions').add({
+                    user_id: currentUser.id,
+                    type: 'ad_watched',
+                    amount: reward,
+                    network: adNetwork,
+                    status: 'completed',
+                    timestamp: new Date().toISOString()
+                });
+                
+                // Update local user
+                currentUser.balance += reward;
+                currentUser.total_earned += reward;
+                currentUser.today_earnings += reward;
+                currentUser.ads_watched += 1;
+                
+                updateUI();
+                
+                alert(`🎉 You earned ${reward.toFixed(3)} TON!`);
+                
+            } catch (error) {
+                console.error('Error watching ad:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        function calculateAdReward(adsWatched) {
+            if (adsWatched < 400) return 0.005;
+            if (adsWatched < 1000) return 0.05;
+            return 0.08;
+        }
+        
+        function showScreen(screenName) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.style.display = 'none';
+            });
+            
+            // Show selected screen
+            document.getElementById(screenName).style.display = 'block';
+            
+            // Update nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+        
+        async function withdraw() {
+            const address = document.getElementById('walletAddress').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            
+            if (!address || !amount) {
+                alert('Please enter wallet address and amount');
+                return;
+            }
+            
+            if (amount < 2) {
+                alert('Minimum withdrawal is 2 TON');
+                return;
+            }
+            
+            if (amount > currentUser.balance) {
+                alert('Insufficient balance');
+                return;
+            }
+            
+            const fee = amount * 0.20;
+            const netAmount = amount - fee;
+            
+            if (confirm(`Withdraw ${amount} TON?\nFee: ${fee.toFixed(3)} TON\nYou receive: ${netAmount.toFixed(3)} TON`)) {
+                try {
+                    // Create withdrawal request
+                    await db.collection('withdrawals').add({
+                        user_id: currentUser.id,
+                        amount: amount,
+                        fee: fee,
+                        net_amount: netAmount,
+                        wallet_address: address,
+                        status: 'pending',
+                        requested_at: new Date().toISOString()
+                    });
+                    
+                    // Update user balance
+                    const userRef = db.collection('users').doc(currentUser.id);
+                    await userRef.update({
+                        balance: firebase.firestore.FieldValue.increment(-amount)
+                    });
+                    
+                    // Update local user
+                    currentUser.balance -= amount;
+                    updateUI();
+                    
+                    alert('✅ Withdrawal request submitted!\nProcessing: 5-30 minutes');
+                    
+                    // Clear form
+                    document.getElementById('walletAddress').value = '';
+                    document.getElementById('amount').value = '';
+                    
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                }
+            }
+        }
+        
+        // Load tasks from Firestore
+        async function loadTasks() {
+            try {
+                const snapshot = await db.collection('tasks')
+                    .where('status', '==', 'active')
+                    .limit(10)
+                    .get();
+                
+                const tasksList = document.getElementById('tasksList');
+                tasksList.innerHTML = '';
+                
+                snapshot.forEach(doc => {
+                    const task = doc.data();
+                    tasksList.innerHTML += `
+                        <div class="card">
+                            <h4>${task.title}</h4>
+                            <p>${task.description}</p>
+                            <p>Reward: ${task.reward} TON</p>
+                            <button onclick="completeTask('${doc.id}')">Complete Task</button>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+            }
+        }
+        
+        async function completeTask(taskId) {
+            try {
+                const taskRef = db.collection('tasks').doc(taskId);
+                const taskDoc = await taskRef.get();
+                
+                if (!taskDoc.exists) {
+                    alert('Task not found');
+                    return;
+                }
+                
+                const task = taskDoc.data();
+                const reward = task.reward;
+                
+                // Update user
+                const userRef = db.collection('users').doc(currentUser.id);
+                await userRef.update({
+                    balance: firebase.firestore.FieldValue.increment(reward),
+                    total_earned: firebase.firestore.FieldValue.increment(reward),
+                    tasks_completed: firebase.firestore.FieldValue.increment(1)
+                });
+                
+                // Create transaction
+                await db.collection('transactions').add({
+                    user_id: currentUser.id,
+                    type: 'task_completed',
+                    amount: reward,
+                    task_id: taskId,
+                    status: 'completed',
+                    timestamp: new Date().toISOString()
+                });
+                
+                // Update local user
+                currentUser.balance += reward;
+                currentUser.total_earned += reward;
+                currentUser.tasks_completed += 1;
+                
+                updateUI();
+                
+                alert(`✅ Task completed! Earned ${reward} TON`);
+                
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        // Initialize when page loads
+        window.onload = initApp;
+    </script>
 </body>
 </html>
