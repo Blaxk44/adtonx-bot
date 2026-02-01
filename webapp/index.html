@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdTONX - Watch Ads, Earn TON</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Adexium Ads -->
+    <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="loading" class="screen active">
+            <div class="loading-spinner"></div>
+            <p>Loading AdTONX...</p>
+        </div>
+
+        <div id="main" class="screen">
+            <!-- Header -->
+            <header class="header">
+                <div class="balance-card">
+                    <h3>💰 Balance</h3>
+                    <h1 id="balance">0.00 TON</h1>
+                    <div class="balance-stats">
+                        <span>Today: <span id="todayEarnings">0.00 TON</span></span>
+                        <span>Total: <span id="totalEarned">0.00 TON</span></span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Navigation -->
+            <nav class="nav">
+                <button class="nav-btn active" onclick="showScreen('home')">🏠 Home</button>
+                <button class="nav-btn" onclick="showScreen('ads')">📺 Ads</button>
+                <button class="nav-btn" onclick="showScreen('tasks')">🧠 Tasks</button>
+                <button class="nav-btn" onclick="showScreen('wallet')">💼 Wallet</button>
+            </nav>
+
+            <!-- Screens -->
+            <div class="screen-content">
+                <!-- Home Screen -->
+                <div id="home-screen" class="content active">
+                    <div class="quick-actions">
+                        <button class="action-btn" onclick="watchAd('monetag')">
+                            📺 Watch Ad<br>
+                            <small>Earn 0.005-0.08 TON</small>
+                        </button>
+                        <button class="action-btn" onclick="showScreen('tasks')">
+                            📋 Daily Tasks<br>
+                            <small>+0.25 TON Bonus</small>
+                        </button>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-label">Ads Today</span>
+                            <span class="stat-value" id="adsToday">0/3000</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Earned Today</span>
+                            <span class="stat-value" id="earnedToday">0 TON</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Referrals</span>
+                            <span class="stat-value" id="referralCount">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Tasks Done</span>
+                            <span class="stat-value" id="tasksDone">0</span>
+                        </div>
+                    </div>
+
+                    <div class="announcement">
+                        <h3>📢 Announcement</h3>
+                        <p>Watch ads and complete tasks to earn TON cryptocurrency!</p>
+                    </div>
+
+                    <div class="tutorial">
+                        <h3>📚 How to Earn</h3>
+                        <ol>
+                            <li>Watch ads (3000 daily limit)</li>
+                            <li>Complete tasks for extra rewards</li>
+                            <li>Refer friends for 10% lifetime commission</li>
+                            <li>Withdraw minimum 2 TON (20% fee)</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- Ads Screen -->
+                <div id="ads-screen" class="content">
+                    <h3>📺 Available Ad Networks</h3>
+                    
+                    <div class="network-card">
+                        <h4>Monetag Ads</h4>
+                        <p>Reward: 0.005-0.08 TON per ad</p>
+                        <p class="small">Watch video ads and earn TON</p>
+                        <button class="btn-network" onclick="watchAd('monetag')">Watch Ad</button>
+                    </div>
+
+                    <div class="network-card">
+                        <h4>Adexium Ads</h4>
+                        <p>Reward: 0.008 TON per ad</p>
+                        <p class="small">Interactive ads with auto-play</p>
+                        <button class="btn-network" onclick="watchAd('adexium')">Watch Ad</button>
+                    </div>
+
+                    <div class="network-card">
+                        <h4>AdsGram Ads</h4>
+                        <p>Reward: 0.006 TON per ad</p>
+                        <p class="small">CPM based advertising</p>
+                        <button class="btn-network" onclick="watchAd('adsgram')">Watch Ad</button>
+                    </div>
+
+                    <div class="progress-section">
+                        <h4>🎯 Daily Progress</h4>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="dailyProgress"></div>
+                        </div>
+                        <p>Ads watched today: <span id="dailyAds">0</span>/3000</p>
+                    </div>
+                </div>
+
+                <!-- Tasks Screen -->
+                <div id="tasks-screen" class="content">
+                    <h3>🧠 Available Tasks</h3>
+                    
+                    <div id="tasksList">
+                        <!-- Tasks will load here -->
+                    </div>
+                </div>
+
+                <!-- Wallet Screen -->
+                <div id="wallet-screen" class="content">
+                    <h3>💼 Wallet</h3>
+                    
+                    <div class="wallet-info">
+                        <div class="info-card">
+                            <h4>Current Balance</h4>
+                            <h2 id="walletBalance">0.00 TON</h2>
+                        </div>
+                        
+                        <div class="info-card">
+                            <h4>Minimum Withdrawal</h4>
+                            <p>2 TON (20% fee)</p>
+                            <p class="small">You receive: 1.6 TON</p>
+                        </div>
+                    </div>
+
+                    <div class="withdrawal-form">
+                        <h4>💰 Withdraw TON</h4>
+                        <input type="text" id="walletAddress" placeholder="TON Wallet Address" class="form-input">
+                        <input type="number" id="withdrawAmount" placeholder="Amount (Min: 2 TON)" class="form-input" step="0.001" min="2">
+                        <button class="btn-withdraw" onclick="requestWithdrawal()">Request Withdrawal</button>
+                        <p class="small">Fee: 20% | Processing: 5-30 minutes</p>
+                    </div>
+
+                    <div class="transactions">
+                        <h4>📜 Recent Transactions</h4>
+                        <div id="transactionList">
+                            <p>No transactions yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ad Modal -->
+        <div id="adModal" class="modal">
+            <div class="modal-content">
+                <h3>📺 Watching Ad</h3>
+                <p>Please watch the ad completely to earn TON</p>
+                
+                <div id="adContainer">
+                    <!-- Ad will load here -->
+                </div>
+                
+                <div class="timer-section">
+                    <div class="timer-circle">
+                        <span id="countdown">10</span>
+                    </div>
+                    <p>Remaining: <span id="timerText">10 seconds</span></p>
+                </div>
+                
+                <button class="btn-skip" onclick="skipAd()">Skip Ad (No Reward)</button>
+                <button class="btn-complete" onclick="completeAd()" style="display:none;" id="completeBtn">Complete & Earn</button>
+            </div>
+        </div>
+
+        <!-- Success Modal -->
+        <div id="successModal" class="modal success">
+            <div class="modal-content">
+                <h3>🎉 Congratulations!</h3>
+                <p>You earned <span id="rewardAmount">0.00</span> TON!</p>
+                <p>New balance: <span id="newBalance">0.00</span> TON</p>
+                <button class="btn-ok" onclick="closeSuccessModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
