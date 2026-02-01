@@ -5,83 +5,1116 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AdTONX - Watch Ads, Earn TON</title>
     
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js"></script>
-    
-    <!-- Telegram WebApp -->
+    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        /* Simple styles for mobile */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial; padding: 20px; background: #f5f7fa; }
-        .card { background: white; padding: 20px; border-radius: 10px; margin: 10px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .balance { font-size: 2em; color: #0088cc; font-weight: bold; }
-        button { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 8px; font-size: 1.1em; }
-        .btn-primary { background: #0088cc; color: white; }
-        .nav { display: flex; gap: 10px; margin: 20px 0; }
-        .nav-btn { flex: 1; padding: 10px; background: #eee; border-radius: 5px; }
-        .nav-btn.active { background: #0088cc; color: white; }
+        /* ====== RESET & BASE ====== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        :root {
+            --primary: #0088cc;
+            --primary-dark: #006699;
+            --secondary: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --gray: #95a5a6;
+            --white: #ffffff;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+            color: var(--dark);
+        }
+
+        /* ====== APP CONTAINER ====== */
+        #app {
+            max-width: 500px;
+            margin: 0 auto;
+            background: var(--white);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            min-height: 95vh;
+        }
+
+        /* ====== LOADING SCREEN ====== */
+        #loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: var(--white);
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--light);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ====== HEADER ====== */
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--white);
+            padding: 25px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .logo-icon {
+            font-size: 28px;
+            background: rgba(255, 255, 255, 0.2);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-text h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .logo-text p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* ====== BALANCE CARD ====== */
+        .balance-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-top: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .balance-card h3 {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .balance-amount {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin: 5px 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .balance-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+
+        /* ====== NAVIGATION ====== */
+        .nav {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            background: var(--white);
+            border-bottom: 1px solid var(--light);
+        }
+
+        .nav-btn {
+            padding: 18px 10px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1.4rem;
+            color: var(--gray);
+            transition: var(--transition);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .nav-btn span {
+            font-size: 0.75rem;
+        }
+
+        .nav-btn.active {
+            color: var(--primary);
+        }
+
+        .nav-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        /* ====== CONTENT AREA ====== */
+        .content {
+            padding: 20px;
+            min-height: 500px;
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ====== HOME SCREEN ====== */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius);
+            padding: 25px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 136, 204, 0.3);
+        }
+
+        .action-btn i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .action-btn .title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .action-btn .subtitle {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        /* ====== STATS GRID ====== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .stat-card {
+            background: var(--light);
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        /* ====== ADS SCREEN ====== */
+        .ad-networks {
+            margin-bottom: 25px;
+        }
+
+        .network-card {
+            background: var(--white);
+            border: 2px solid var(--light);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: var(--transition);
+        }
+
+        .network-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .network-card h4 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .network-card h4 i {
+            font-size: 1.2rem;
+        }
+
+        .network-card p {
+            color: var(--gray);
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .btn-network {
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        .btn-network:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        /* ====== TASKS SCREEN ====== */
+        .task-card {
+            background: var(--white);
+            border: 1px solid var(--light);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: var(--transition);
+        }
+
+        .task-card:hover {
+            border-color: var(--secondary);
+            box-shadow: var(--shadow);
+        }
+
+        .task-card h4 {
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .task-card p {
+            color: var(--gray);
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .task-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .task-reward {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: var(--white);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .task-progress {
+            color: var(--gray);
+            font-size: 0.85rem;
+        }
+
+        .btn-task {
+            background: var(--secondary);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        .btn-task:hover {
+            background: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        /* ====== WALLET SCREEN ====== */
+        .wallet-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .wallet-btn {
+            background: var(--light);
+            border: 2px solid var(--light);
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .wallet-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .wallet-btn i {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .wallet-info {
+            background: var(--light);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .address-box {
+            background: var(--white);
+            border: 1px solid var(--gray);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            word-break: break-all;
+            font-size: 0.9rem;
+        }
+
+        .btn-small {
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-small:hover {
+            background: var(--primary-dark);
+        }
+
+        /* ====== MODALS ====== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlide 0.3s ease;
+        }
+
+        @keyframes modalSlide {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            color: var(--dark);
+            font-size: 1.3rem;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--gray);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            color: var(--danger);
+        }
+
+        /* ====== AD TIMER ====== */
+        .ad-timer {
+            text-align: center;
+            margin: 25px 0;
+        }
+
+        .timer-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: conic-gradient(var(--primary) 0%, var(--light) 0%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+
+        .timer-circle::before {
+            content: '';
+            position: absolute;
+            width: 90px;
+            height: 90px;
+            background: var(--white);
+            border-radius: 50%;
+        }
+
+        .timer-circle span {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            position: relative;
+            z-index: 1;
+        }
+
+        .ad-container {
+            background: var(--light);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .ad-placeholder {
+            font-size: 3rem;
+            color: var(--gray);
+            margin-bottom: 15px;
+        }
+
+        .btn-complete {
+            background: var(--secondary);
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius);
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .btn-complete:hover {
+            background: #27ae60;
+        }
+
+        .btn-skip {
+            background: none;
+            color: var(--gray);
+            border: 1px solid var(--gray);
+            border-radius: var(--radius);
+            padding: 12px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-skip:hover {
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        /* ====== SUCCESS MODAL ====== */
+        .success-modal .modal-content {
+            text-align: center;
+            padding: 40px 30px;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: var(--secondary);
+            margin-bottom: 20px;
+        }
+
+        .success-amount {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 10px 0;
+        }
+
+        .btn-ok {
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius);
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 20px;
+        }
+
+        .btn-ok:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        /* ====== FORM ELEMENTS ====== */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--light);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* ====== PROGRESS BARS ====== */
+        .progress-bar {
+            height: 10px;
+            background: var(--light);
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* ====== RESPONSIVE ====== */
+        @media (max-width: 480px) {
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .wallet-actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                padding: 20px;
+            }
+            
+            .balance-amount {
+                font-size: 2.2rem;
+            }
+        }
+
+        /* ====== UTILITIES ====== */
+        .text-center { text-align: center; }
+        .text-primary { color: var(--primary); }
+        .text-success { color: var(--secondary); }
+        .text-warning { color: var(--warning); }
+        .text-danger { color: var(--danger); }
+        .mb-10 { margin-bottom: 10px; }
+        .mb-20 { margin-bottom: 20px; }
+        .mt-20 { margin-top: 20px; }
+        .d-none { display: none; }
+        .d-block { display: block; }
     </style>
 </head>
 <body>
     <div id="app">
-        <!-- Loading -->
-        <div id="loading" style="text-align:center; padding:50px;">
+        <!-- Loading Screen -->
+        <div id="loading">
+            <div class="loader"></div>
             <h2>Loading AdTONX...</h2>
+            <p style="margin-top: 10px; color: #666;">Connecting to your wallet</p>
         </div>
-        
+
         <!-- Main App -->
-        <div id="main" style="display:none;">
+        <div id="main" class="d-none">
             <!-- Header -->
-            <div class="card">
-                <h3>💰 Your Balance</h3>
-                <div class="balance" id="balance">0.00 TON</div>
-                <p>Today: <span id="todayEarnings">0.00 TON</span></p>
-            </div>
-            
-            <!-- Navigation -->
-            <div class="nav">
-                <button class="nav-btn active" onclick="showScreen('home')">🏠 Home</button>
-                <button class="nav-btn" onclick="showScreen('ads')">📺 Ads</button>
-                <button class="nav-btn" onclick="showScreen('tasks')">✅ Tasks</button>
-                <button class="nav-btn" onclick="showScreen('wallet')">💰 Wallet</button>
-            </div>
-            
-            <!-- Screens -->
-            <div id="home" class="screen">
-                <button class="btn-primary" onclick="watchAd()">📺 Watch Ad & Earn</button>
-                <button onclick="showScreen('tasks')">✅ Complete Tasks</button>
-                <button onclick="showScreen('wallet')">💰 Withdraw TON</button>
-            </div>
-            
-            <div id="ads" class="screen" style="display:none;">
-                <h3>Available Ads</h3>
-                <div class="card">
-                    <h4>Monetag Ad</h4>
-                    <p>Earn: 0.005-0.08 TON</p>
-                    <button class="btn-primary" onclick="watchAd('monetag')">Watch Ad</button>
+            <div class="header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1>AdTONX</h1>
+                        <p>Watch Ads. Earn TON.</p>
+                    </div>
+                </div>
+                
+                <div class="balance-card">
+                    <h3>Your Balance</h3>
+                    <div class="balance-amount" id="balance">0.000 TON</div>
+                    <div class="balance-stats">
+                        <span>Today: <span id="todayEarnings">0.000 TON</span></span>
+                        <span>Total: <span id="totalEarned">0.000 TON</span></span>
+                    </div>
                 </div>
             </div>
-            
-            <div id="tasks" class="screen" style="display:none;">
-                <h3>Available Tasks</h3>
-                <div id="tasksList"></div>
+
+            <!-- Navigation -->
+            <nav class="nav">
+                <button class="nav-btn active" onclick="showScreen('home')">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </button>
+                <button class="nav-btn" onclick="showScreen('ads')">
+                    <i class="fas fa-tv"></i>
+                    <span>Ads</span>
+                </button>
+                <button class="nav-btn" onclick="showScreen('tasks')">
+                    <i class="fas fa-tasks"></i>
+                    <span>Tasks</span>
+                </button>
+                <button class="nav-btn" onclick="showScreen('wallet')">
+                    <i class="fas fa-wallet"></i>
+                    <span>Wallet</span>
+                </button>
+            </nav>
+
+            <!-- Content Area -->
+            <div class="content">
+                <!-- Home Screen -->
+                <div id="home-screen" class="screen active">
+                    <div class="quick-actions">
+                        <button class="action-btn" onclick="watchAd('monetag')">
+                            <i class="fas fa-play-circle"></i>
+                            <div class="title">Watch Ad</div>
+                            <div class="subtitle">Earn 0.005-0.08 TON</div>
+                        </button>
+                        <button class="action-btn" onclick="showScreen('tasks')">
+                            <i class="fas fa-check-circle"></i>
+                            <div class="title">Complete Tasks</div>
+                            <div class="subtitle">+0.25 TON Bonus</div>
+                        </button>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-label">Ads Today</span>
+                            <span class="stat-value" id="adsToday">0/3000</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">CPM Progress</span>
+                            <span class="stat-value" id="cpmProgress">0/10000</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Referrals</span>
+                            <span class="stat-value" id="referralCount">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Rank</span>
+                            <span class="stat-value" id="userRank">#-</span>
+                        </div>
+                    </div>
+
+                    <div class="task-card">
+                        <h4><i class="fas fa-gift text-warning"></i> Daily Bonus</h4>
+                        <p>Login daily to claim extra rewards!</p>
+                        <button class="btn-task" onclick="claimDailyBonus()">
+                            <i class="fas fa-gift"></i> Claim Daily Bonus
+                        </button>
+                    </div>
+
+                    <div class="task-card">
+                        <h4><i class="fas fa-users text-primary"></i> Refer & Earn</h4>
+                        <p>Invite friends and earn 10% lifetime commission</p>
+                        <button class="btn-task" onclick="showReferral()">
+                            <i class="fas fa-share-alt"></i> Invite Friends
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Ads Screen -->
+                <div id="ads-screen" class="screen">
+                    <h3 class="mb-20"><i class="fas fa-tv text-primary"></i> Available Ad Networks</h3>
+                    
+                    <div class="network-card">
+                        <h4><i class="fas fa-play-circle text-danger"></i> Monetag Ads</h4>
+                        <p>Watch video ads and earn TON. First 400 ads: 0.005 TON, then 0.05 TON extra!</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="monetagProgress"></div>
+                        </div>
+                        <p class="text-center mb-10">Reward: <strong>0.005-0.08 TON</strong></p>
+                        <button class="btn-network" onclick="watchAd('monetag')">
+                            <i class="fas fa-play"></i> Watch Monetag Ad
+                        </button>
+                    </div>
+
+                    <div class="network-card">
+                        <h4><i class="fas fa-bolt text-warning"></i> Adexium Ads</h4>
+                        <p>Interactive ads with auto-play. Complete 400 ads for extra rewards!</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="adexiumProgress"></div>
+                        </div>
+                        <p class="text-center mb-10">Reward: <strong>0.005-0.08 TON</strong></p>
+                        <button class="btn-network" onclick="watchAd('adexium')">
+                            <i class="fas fa-bolt"></i> Watch Adexium Ad
+                        </button>
+                    </div>
+
+                    <div class="network-card">
+                        <h4><i class="fas fa-chart-line text-success"></i> AdsGram CPM</h4>
+                        <p>CPM-based advertising. Complete 10000 clicks for 0.25 TON bonus!</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="cpmBar"></div>
+                        </div>
+                        <p class="text-center mb-10">Progress: <span id="cpmCount">0</span>/10000 clicks</p>
+                        <button class="btn-network" onclick="watchAd('adsgram')">
+                            <i class="fas fa-mouse-pointer"></i> Click AdsGram Ad
+                        </button>
+                    </div>
+
+                    <div class="task-card">
+                        <h4><i class="fas fa-trophy text-warning"></i> Weekly Leaderboard</h4>
+                        <p>Top 100 ad watchers get 5 TON reward!</p>
+                        <p><strong>🥇 Top 10:</strong> 2 TON each</p>
+                        <p><strong>🏆 Next 90:</strong> 3 TON shared</p>
+                        <button class="btn-task" onclick="showLeaderboard()">
+                            <i class="fas fa-trophy"></i> View Leaderboard
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tasks Screen -->
+                <div id="tasks-screen" class="screen">
+                    <h3 class="mb-20"><i class="fas fa-tasks text-primary"></i> Available Tasks</h3>
+                    
+                    <div class="tabs mb-20">
+                        <button class="btn-small active" onclick="filterTasks('official')">Official</button>
+                        <button class="btn-small" onclick="filterTasks('partner')">Partner</button>
+                        <button class="btn-small" onclick="filterTasks('paid')">Paid Tasks</button>
+                    </div>
+
+                    <div id="tasksList">
+                        <!-- Tasks will be loaded here -->
+                        <div class="task-card">
+                            <h4><i class="fas fa-paper-plane text-primary"></i> Join Telegram Channel</h4>
+                            <p>Join our official Telegram channel to get updates and announcements</p>
+                            <div class="task-info">
+                                <span class="task-reward">0.1 TON</span>
+                                <span class="task-progress">25/100 clicks</span>
+                            </div>
+                            <button class="btn-task" onclick="completeTask('telegram')">
+                                <i class="fas fa-check"></i> Complete Task
+                            </button>
+                        </div>
+
+                        <div class="task-card">
+                            <h4><i class="fab fa-twitter text-info"></i> Follow on Twitter</h4>
+                            <p>Follow us on Twitter/X for latest updates and giveaways</p>
+                            <div class="task-info">
+                                <span class="task-reward">0.05 TON</span>
+                                <span class="task-progress">10/50 clicks</span>
+                            </div>
+                            <button class="btn-task" onclick="completeTask('twitter')">
+                                <i class="fas fa-check"></i> Complete Task
+                            </button>
+                        </div>
+
+                        <div class="task-card">
+                            <h4><i class="fas fa-globe text-success"></i> Visit Website</h4>
+                            <p>Visit our website and explore all features for 30 seconds</p>
+                            <div class="task-info">
+                                <span class="task-reward">0.02 TON</span>
+                                <span class="task-progress">80/200 clicks</span>
+                            </div>
+                            <button class="btn-task" onclick="completeTask('website')">
+                                <i class="fas fa-check"></i> Complete Task
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="task-card mt-20">
+                        <h4><i class="fas fa-plus-circle text-success"></i> Create Paid Task</h4>
+                        <p>Promote your content by creating tasks. 1 TON = 250 clicks</p>
+                        <button class="btn-task" onclick="showCreateTask()">
+                            <i class="fas fa-plus"></i> Create Your Own Task
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Wallet Screen -->
+                <div id="wallet-screen" class="screen">
+                    <h3 class="mb-20"><i class="fas fa-wallet text-primary"></i> Wallet</h3>
+                    
+                    <div class="wallet-actions">
+                        <button class="wallet-btn" onclick="showDeposit()">
+                            <i class="fas fa-plus-circle"></i>
+                            <div>Deposit</div>
+                            <small>Min: 10 TON</small>
+                        </button>
+                        <button class="wallet-btn" onclick="showWithdraw()">
+                            <i class="fas fa-minus-circle"></i>
+                            <div>Withdraw</div>
+                            <small>Min: 2 TON</small>
+                        </button>
+                    </div>
+
+                    <div class="wallet-info">
+                        <h4 class="mb-10"><i class="fas fa-address-card"></i> TON Wallet Address</h4>
+                        <div class="address-box" id="walletAddress">
+                            Not set. Click to add your TON wallet.
+                        </div>
+                        <button class="btn-small" onclick="setWalletAddress()">
+                            <i class="fas fa-edit"></i> Set Wallet Address
+                        </button>
+                    </div>
+
+                    <div class="task-card">
+                        <h4><i class="fas fa-info-circle text-primary"></i> Withdrawal Information</h4>
+                        <p><strong>Minimum:</strong> 2 TON</p>
+                        <p><strong>Fee:</strong> 20% (0.4 TON for 2 TON withdrawal)</p>
+                        <p><strong>You receive:</strong> 1.6 TON (for 2 TON withdrawal)</p>
+                        <p><strong>Processing:</strong> 5-30 minutes</p>
+                    </div>
+
+                    <h4 class="mt-20"><i class="fas fa-history"></i> Recent Transactions</h4>
+                    <div id="transactionList" class="mt-10">
+                        <p class="text-center text-gray">No transactions yet</p>
+                    </div>
+                </div>
             </div>
-            
-            <div id="wallet" class="screen" style="display:none;">
-                <h3>Withdraw TON</h3>
-                <input type="text" id="walletAddress" placeholder="TON Wallet Address" style="width:100%; padding:10px; margin:10px 0;">
-                <input type="number" id="amount" placeholder="Amount (Min: 2 TON)" style="width:100%; padding:10px; margin:10px 0;">
-                <button class="btn-primary" onclick="withdraw()">Request Withdrawal</button>
+        </div>
+
+        <!-- Ad Watching Modal -->
+        <div id="adModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-tv"></i> Watching Ad</h3>
+                    <button class="close-modal" onclick="closeAdModal()">×</button>
+                </div>
+                
+                <p class="text-center mb-20">Please watch the ad completely to earn TON</p>
+                
+                <div class="ad-timer">
+                    <div class="timer-circle">
+                        <span id="countdown">10</span>
+                    </div>
+                    <p>Remaining: <span id="timerText">10 seconds</span></p>
+                </div>
+                
+                <div class="ad-container">
+                    <div class="ad-placeholder" id="adPlaceholder">
+                        📺
+                    </div>
+                    <p id="adMessage">Loading advertisement...</p>
+                </div>
+                
+                <div class="d-none" id="adControls">
+                    <button class="btn-complete" onclick="completeAd()" id="completeBtn">
+                        <i class="fas fa-check-circle"></i> Complete & Earn TON
+                    </button>
+                    <button class="btn-skip" onclick="skipAd()">
+                        <i class="fas fa-times"></i> Skip Ad (No Reward)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Modal -->
+        <div id="successModal" class="modal success-modal">
+            <div class="modal-content">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2>Congratulations! 🎉</h2>
+                <p>You earned</p>
+                <div class="success-amount" id="rewardAmount">0.000 TON</div>
+                <p>New balance: <strong id="newBalance">0.000 TON</strong></p>
+                <button class="btn-ok" onclick="closeSuccessModal()">
+                    <i class="fas fa-check"></i> Continue
+                </button>
+            </div>
+        </div>
+
+        <!-- Withdrawal Modal -->
+        <div id="withdrawModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-money-bill-wave"></i> Withdraw TON</h3>
+                    <button class="close-modal" onclick="closeWithdrawModal()">×</button>
+                </div>
+                
+                <div class="form-group">
+                    <label>TON Wallet Address:</label>
+                    <input type="text" id="withdrawAddress" class="form-control" 
+                           placeholder="UQCPPw01FTldjEuWeeup-wf80MJFGaB86IrQ1q-h_QpuDjc1">
+                </div>
+                
+                <div class="form-group">
+                    <label>Amount (TON):</label>
+                    <input type="number" id="withdrawAmount" class="form-control" 
+                           placeholder="Minimum: 2 TON" step="0.001" min="2">
+                </div>
+                
+                <div class="task-card mb-20">
+                    <p><strong>Fee:</strong> <span id="feeAmount">0.4</span> TON (20%)</p>
+                    <p><strong>You receive:</strong> <span id="netAmount">1.6</span> TON</p>
+                    <p><strong>Processing:</strong> 5-30 minutes</p>
+                </div>
+                
+                <button class="btn-complete" onclick="processWithdrawal()">
+                    <i class="fas fa-paper-plane"></i> Request Withdrawal
+                </button>
+            </div>
+        </div>
+
+        <!-- Deposit Modal -->
+        <div id="depositModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-coins"></i> Deposit TON</h3>
+                    <button class="close-modal" onclick="closeDepositModal()">×</button>
+                </div>
+                
+                <p class="mb-20">Send TON to the following address:</p>
+                
+                <div class="address-box text-center" id="depositAddress">
+                    UQCPPw01FTldjEuWeeup-wf80MJFGaB86IrQ1q-h_QpuDjc1
+                </div>
+                
+                <button class="btn-small mt-10" onclick="copyDepositAddress()">
+                    <i class="fas fa-copy"></i> Copy Address
+                </button>
+                
+                <div class="task-card mt-20">
+                    <p><strong>Network:</strong> TON</p>
+                    <p><strong>Minimum:</strong> 10 TON</p>
+                    <p><strong>Confirmation:</strong> 2-3 minutes</p>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Firebase configuration
+        // ============================================
+        // 🔥 FIREBASE CONFIGURATION
+        // ============================================
         const firebaseConfig = {
             apiKey: "AIzaSyCToNn1VqYZrZjjbbBA2KW126ZBso-0D80",
             authDomain: "adtonx-bot.firebaseapp.com",
@@ -91,270 +1124,796 @@
             appId: "1:290170776005:web:82f88036aa42d080e2c3ac",
             measurementId: "G-6S0F9NY64F"
         };
-        
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        
+
+        // ============================================
+        // 🎮 GLOBAL VARIABLES
+        // ============================================
+        let tg = null;
+        let db = null;
         let currentUser = null;
+        let adTimer = null;
+        let currentAdType = null;
+        let adSeconds = 10;
         
-        // Initialize app
+        // Mock user data (replace with Firebase in production)
+        const mockUser = {
+            id: 'demo_user',
+            username: 'demo',
+            balance: 0.525,
+            total_earned: 2.345,
+            today_earnings: 0.125,
+            ads_watched: 156,
+            ads_monetag: 50,
+            ads_adexium: 56,
+            ads_adsgram: 50,
+            cpm_clicks: 3420,
+            tasks_completed: 8,
+            referral_count: 3,
+            wallet_address: null,
+            created_at: new Date().toISOString(),
+            status: 'active'
+        };
+
+        // ============================================
+        // 🚀 INITIALIZATION
+        // ============================================
         async function initApp() {
-            // Initialize Telegram WebApp
-            if (typeof Telegram !== 'undefined') {
-                window.Telegram.WebApp.expand();
-                window.Telegram.WebApp.ready();
-                
-                // Get user from Telegram
-                const tgUser = Telegram.WebApp.initDataUnsafe.user;
-                
-                // Create/Get user in Firestore
-                currentUser = await getUserFromFirestore(tgUser);
-                
-                // Update UI
-                updateUI();
+            try {
+                // Initialize Telegram WebApp
+                if (typeof Telegram !== 'undefined') {
+                    tg = Telegram.WebApp;
+                    tg.expand();
+                    tg.ready();
+                    tg.enableClosingConfirmation();
+                    
+                    // Set theme colors
+                    tg.setHeaderColor('#0088cc');
+                    tg.setBackgroundColor('#f5f7fa');
+                    
+                    console.log('✅ Telegram WebApp initialized');
+                } else {
+                    console.log('⚠️ Running in browser mode');
+                }
+
+                // Initialize Firebase
+                try {
+                    firebase.initializeApp(firebaseConfig);
+                    db = firebase.firestore();
+                    console.log('✅ Firebase initialized');
+                } catch (firebaseError) {
+                    console.log('⚠️ Firebase initialization failed, using mock data');
+                }
+
+                // Load user data
+                await loadUserData();
                 
                 // Hide loading, show app
                 document.getElementById('loading').style.display = 'none';
-                document.getElementById('main').style.display = 'block';
-            } else {
-                // Fallback for testing
-                document.getElementById('loading').innerHTML = '<h2>Please open in Telegram</h2>';
-            }
-        }
-        
-        async function getUserFromFirestore(tgUser) {
-            const userRef = db.collection('users').doc(tgUser.id.toString());
-            const doc = await userRef.get();
-            
-            if (doc.exists) {
-                return { id: doc.id, ...doc.data() };
-            } else {
-                // Create new user
-                const newUser = {
-                    telegram_id: tgUser.id,
-                    username: tgUser.username,
-                    first_name: tgUser.first_name,
-                    last_name: tgUser.last_name,
-                    balance: 0,
-                    total_earned: 0,
-                    today_earnings: 0,
-                    ads_watched: 0,
-                    tasks_completed: 0,
-                    status: 'active',
-                    created_at: new Date().toISOString(),
-                    last_active: new Date().toISOString()
-                };
+                document.getElementById('main').classList.remove('d-none');
                 
-                await userRef.set(newUser);
-                return { id: tgUser.id.toString(), ...newUser };
-            }
-        }
-        
-        function updateUI() {
-            if (currentUser) {
-                document.getElementById('balance').textContent = currentUser.balance.toFixed(3) + ' TON';
-                document.getElementById('todayEarnings').textContent = currentUser.today_earnings.toFixed(3) + ' TON';
-            }
-        }
-        
-        async function watchAd(adNetwork = 'monetag') {
-            try {
-                // Show ad (simulated)
-                alert('📺 Ad playing... Please wait 5 seconds');
-                
-                // Calculate reward
-                const reward = calculateAdReward(currentUser.ads_watched);
-                
-                // Update user in Firestore
-                const userRef = db.collection('users').doc(currentUser.id);
-                await userRef.update({
-                    balance: firebase.firestore.FieldValue.increment(reward),
-                    total_earned: firebase.firestore.FieldValue.increment(reward),
-                    today_earnings: firebase.firestore.FieldValue.increment(reward),
-                    ads_watched: firebase.firestore.FieldValue.increment(1),
-                    last_active: new Date().toISOString()
-                });
-                
-                // Create transaction record
-                await db.collection('transactions').add({
-                    user_id: currentUser.id,
-                    type: 'ad_watched',
-                    amount: reward,
-                    network: adNetwork,
-                    status: 'completed',
-                    timestamp: new Date().toISOString()
-                });
-                
-                // Update local user
-                currentUser.balance += reward;
-                currentUser.total_earned += reward;
-                currentUser.today_earnings += reward;
-                currentUser.ads_watched += 1;
-                
+                // Update UI
                 updateUI();
+                updateProgressBars();
                 
-                alert(`🎉 You earned ${reward.toFixed(3)} TON!`);
+                console.log('🎉 AdTONX app loaded successfully!');
+
+            } catch (error) {
+                console.error('❌ Initialization error:', error);
+                document.getElementById('loading').innerHTML = `
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="color: #e74c3c; font-size: 3rem;">⚠️</div>
+                        <h3>Initialization Error</h3>
+                        <p>${error.message}</p>
+                        <button onclick="location.reload()" style="padding: 10px 20px; background: #0088cc; color: white; border: none; border-radius: 5px; margin-top: 20px;">
+                            Reload App
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // ============================================
+        // 👤 USER MANAGEMENT
+        // ============================================
+        async function loadUserData() {
+            try {
+                // Check if in Telegram
+                if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                    const tgUser = tg.initDataUnsafe.user;
+                    const userId = tgUser.id.toString();
+                    
+                    if (db) {
+                        // Try to get user from Firebase
+                        const userRef = db.collection('users').doc(userId);
+                        const doc = await userRef.get();
+                        
+                        if (doc.exists) {
+                            currentUser = { id: doc.id, ...doc.data() };
+                        } else {
+                            // Create new user
+                            currentUser = {
+                                id: userId,
+                                telegram_id: tgUser.id,
+                                username: tgUser.username || 'user',
+                                first_name: tgUser.first_name,
+                                last_name: tgUser.last_name || '',
+                                balance: 0,
+                                total_earned: 0,
+                                today_earnings: 0,
+                                ads_watched: 0,
+                                ads_monetag: 0,
+                                ads_adexium: 0,
+                                ads_adsgram: 0,
+                                cpm_clicks: 0,
+                                tasks_completed: 0,
+                                referral_count: 0,
+                                wallet_address: null,
+                                status: 'active',
+                                created_at: new Date().toISOString(),
+                                last_active: new Date().toISOString()
+                            };
+                            
+                            await userRef.set(currentUser);
+                        }
+                        
+                        // Update last active
+                        await userRef.update({
+                            last_active: new Date().toISOString()
+                        });
+                    } else {
+                        // Use mock data if Firebase not available
+                        currentUser = {
+                            ...mockUser,
+                            id: userId,
+                            username: tgUser.username || 'user',
+                            first_name: tgUser.first_name
+                        };
+                    }
+                } else {
+                    // Use demo data for browser testing
+                    currentUser = mockUser;
+                }
+                
+                console.log('✅ User loaded:', currentUser);
                 
             } catch (error) {
-                console.error('Error watching ad:', error);
-                alert('Error: ' + error.message);
+                console.error('❌ Error loading user:', error);
+                // Fallback to mock data
+                currentUser = mockUser;
             }
         }
-        
-        function calculateAdReward(adsWatched) {
-            if (adsWatched < 400) return 0.005;
-            if (adsWatched < 1000) return 0.05;
-            return 0.08;
+
+        async function updateUserInFirebase(updates) {
+            if (!db || !currentUser) return;
+            
+            try {
+                const userRef = db.collection('users').doc(currentUser.id);
+                await userRef.update(updates);
+                
+                // Update local user
+                Object.assign(currentUser, updates);
+                updateUI();
+                
+            } catch (error) {
+                console.error('❌ Error updating user:', error);
+            }
         }
-        
+
+        // ============================================
+        // 🎨 UI UPDATES
+        // ============================================
+        function updateUI() {
+            if (!currentUser) return;
+            
+            // Update balance
+            document.getElementById('balance').textContent = currentUser.balance.toFixed(3) + ' TON';
+            document.getElementById('todayEarnings').textContent = (currentUser.today_earnings || 0).toFixed(3) + ' TON';
+            document.getElementById('totalEarned').textContent = currentUser.total_earned.toFixed(3) + ' TON';
+            
+            // Update stats
+            document.getElementById('adsToday').textContent = (currentUser.ads_watched || 0) + '/3000';
+            document.getElementById('cpmProgress').textContent = (currentUser.cpm_clicks || 0) + '/10000';
+            document.getElementById('referralCount').textContent = currentUser.referral_count || 0;
+            
+            // Update wallet address
+            if (currentUser.wallet_address) {
+                document.getElementById('walletAddress').textContent = currentUser.wallet_address;
+                document.getElementById('withdrawAddress').value = currentUser.wallet_address;
+            }
+            
+            // Update withdrawal calculation
+            updateWithdrawalCalculation();
+        }
+
+        function updateProgressBars() {
+            if (!currentUser) return;
+            
+            // Monetag progress
+            const monetagPercent = Math.min(((currentUser.ads_monetag || 0) / 1000) * 100, 100);
+            document.getElementById('monetagProgress').style.width = monetagPercent + '%';
+            
+            // Adexium progress
+            const adexiumPercent = Math.min(((currentUser.ads_adexium || 0) / 1000) * 100, 100);
+            document.getElementById('adexiumProgress').style.width = adexiumPercent + '%';
+            
+            // CPM progress
+            const cpmPercent = Math.min(((currentUser.cpm_clicks || 0) / 10000) * 100, 100);
+            document.getElementById('cpmBar').style.width = cpmPercent + '%';
+            document.getElementById('cpmCount').textContent = currentUser.cpm_clicks || 0;
+        }
+
+        // ============================================
+        // 📱 SCREEN MANAGEMENT
+        // ============================================
         function showScreen(screenName) {
             // Hide all screens
             document.querySelectorAll('.screen').forEach(screen => {
-                screen.style.display = 'none';
+                screen.classList.remove('active');
             });
             
             // Show selected screen
-            document.getElementById(screenName).style.display = 'block';
+            document.getElementById(screenName + '-screen').classList.add('active');
             
-            // Update nav buttons
+            // Update navigation
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            event.target.classList.add('active');
-        }
-        
-        async function withdraw() {
-            const address = document.getElementById('walletAddress').value;
-            const amount = parseFloat(document.getElementById('amount').value);
             
-            if (!address || !amount) {
-                alert('Please enter wallet address and amount');
+            const navBtn = document.querySelector(`.nav-btn:nth-child(${getNavIndex(screenName)})`);
+            if (navBtn) navBtn.classList.add('active');
+            
+            // Load data for screen
+            switch(screenName) {
+                case 'tasks':
+                    loadTasks();
+                    break;
+                case 'wallet':
+                    loadTransactions();
+                    break;
+            }
+        }
+
+        function getNavIndex(screenName) {
+            switch(screenName) {
+                case 'home': return 1;
+                case 'ads': return 2;
+                case 'tasks': return 3;
+                case 'wallet': return 4;
+                default: return 1;
+            }
+        }
+
+        // ============================================
+        // 📺 AD SYSTEM
+        // ============================================
+        function watchAd(adNetwork) {
+            currentAdType = adNetwork;
+            adSeconds = 10; // 10 seconds for demo
+            
+            // Reset UI
+            document.getElementById('adControls').classList.add('d-none');
+            document.getElementById('countdown').textContent = adSeconds;
+            document.getElementById('timerText').textContent = adSeconds + ' seconds';
+            
+            // Show appropriate ad
+            const adPlaceholder = document.getElementById('adPlaceholder');
+            const adMessage = document.getElementById('adMessage');
+            
+            switch(adNetwork) {
+                case 'monetag':
+                    adPlaceholder.textContent = '🎬';
+                    adMessage.textContent = 'Monetag Video Ad - Watch for ' + adSeconds + ' seconds';
+                    break;
+                case 'adexium':
+                    adPlaceholder.textContent = '⚡';
+                    adMessage.textContent = 'Adexium Interactive Ad - Engage for ' + adSeconds + ' seconds';
+                    break;
+                case 'adsgram':
+                    adPlaceholder.textContent = '🎯';
+                    adMessage.textContent = 'AdsGram CPM Ad - Click to continue for ' + adSeconds + ' seconds';
+                    break;
+            }
+            
+            // Show modal
+            document.getElementById('adModal').style.display = 'flex';
+            
+            // Start timer
+            startAdTimer();
+        }
+
+        function startAdTimer() {
+            let seconds = adSeconds;
+            const countdownEl = document.getElementById('countdown');
+            const timerText = document.getElementById('timerText');
+            const timerCircle = document.querySelector('.timer-circle');
+            
+            // Clear existing timer
+            if (adTimer) clearInterval(adTimer);
+            
+            adTimer = setInterval(() => {
+                seconds--;
+                countdownEl.textContent = seconds;
+                timerText.textContent = seconds + ' second' + (seconds !== 1 ? 's' : '');
+                
+                // Update circle progress
+                const progress = ((adSeconds - seconds) / adSeconds) * 100;
+                timerCircle.style.background = `conic-gradient(#0088cc ${progress}%, #eee ${progress}%)`;
+                
+                if (seconds <= 0) {
+                    clearInterval(adTimer);
+                    document.getElementById('adControls').classList.remove('d-none');
+                    timerText.textContent = 'Ad complete! Click to earn TON';
+                }
+            }, 1000);
+        }
+
+        async function completeAd() {
+            try {
+                // Calculate reward
+                const reward = calculateAdReward(currentAdType);
+                
+                // Close modal
+                closeAdModal();
+                
+                // Update user data
+                const updates = {
+                    balance: (currentUser.balance || 0) + reward,
+                    total_earned: (currentUser.total_earned || 0) + reward,
+                    today_earnings: (currentUser.today_earnings || 0) + reward,
+                    ads_watched: (currentUser.ads_watched || 0) + 1,
+                    last_active: new Date().toISOString()
+                };
+                
+                // Update specific ad network count
+                if (currentAdType === 'monetag') {
+                    updates.ads_monetag = (currentUser.ads_monetag || 0) + 1;
+                } else if (currentAdType === 'adexium') {
+                    updates.ads_adexium = (currentUser.ads_adexium || 0) + 1;
+                } else if (currentAdType === 'adsgram') {
+                    updates.ads_adsgram = (currentUser.ads_adsgram || 0) + 1;
+                    updates.cpm_clicks = (currentUser.cpm_clicks || 0) + 1;
+                }
+                
+                // Apply updates
+                await updateUserInFirebase(updates);
+                if (!db) {
+                    Object.assign(currentUser, updates);
+                    updateUI();
+                    updateProgressBars();
+                }
+                
+                // Show success
+                showSuccess(reward, currentUser.balance + reward);
+                
+                // Check for bonuses
+                checkBonuses();
+                
+            } catch (error) {
+                console.error('❌ Error completing ad:', error);
+                tg.showPopup({
+                    title: 'Error',
+                    message: 'Failed to complete ad: ' + error.message,
+                    buttons: [{ type: 'ok' }]
+                });
+            }
+        }
+
+        function calculateAdReward(adNetwork) {
+            const adsWatched = currentUser.ads_watched || 0;
+            let baseReward = 0.005;
+            
+            // Tier-based rewards
+            if (adsWatched >= 400 && adsWatched < 1000) {
+                baseReward = 0.05;
+            } else if (adsWatched >= 1000) {
+                baseReward = 0.08;
+            }
+            
+            // CPM bonus for AdsGram
+            if (adNetwork === 'adsgram') {
+                const cpmClicks = currentUser.cpm_clicks || 0;
+                if (cpmClicks >= 10000) {
+                    baseReward += 0.25;
+                } else {
+                    baseReward += cpmClicks * 0.0028;
+                }
+            }
+            
+            return parseFloat(baseReward.toFixed(3));
+        }
+
+        function skipAd() {
+            if (adTimer) clearInterval(adTimer);
+            closeAdModal();
+            tg.showPopup({
+                title: 'Ad Skipped',
+                message: 'No reward earned. Watch the full ad to earn TON.',
+                buttons: [{ type: 'ok' }]
+            });
+        }
+
+        function closeAdModal() {
+            document.getElementById('adModal').style.display = 'none';
+            if (adTimer) {
+                clearInterval(adTimer);
+                adTimer = null;
+            }
+        }
+
+        // ============================================
+        // ✅ TASK SYSTEM
+        // ============================================
+        async function loadTasks() {
+            // In production, load from Firebase
+            // For demo, we use mock tasks
+            console.log('Loading tasks...');
+        }
+
+        async function completeTask(taskType) {
+            const reward = getTaskReward(taskType);
+            
+            const updates = {
+                balance: (currentUser.balance || 0) + reward,
+                total_earned: (currentUser.total_earned || 0) + reward,
+                tasks_completed: (currentUser.tasks_completed || 0) + 1,
+                last_active: new Date().toISOString()
+            };
+            
+            await updateUserInFirebase(updates);
+            if (!db) {
+                Object.assign(currentUser, updates);
+                updateUI();
+            }
+            
+            showSuccess(reward, currentUser.balance + reward);
+        }
+
+        function getTaskReward(taskType) {
+            const rewards = {
+                'telegram': 0.1,
+                'twitter': 0.05,
+                'website': 0.02
+            };
+            return rewards[taskType] || 0.01;
+        }
+
+        function filterTasks(type) {
+            // Update tab buttons
+            document.querySelectorAll('#tasks-screen .btn-small').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // In production, filter tasks from Firebase
+            console.log('Filtering tasks by:', type);
+        }
+
+        // ============================================
+        // 💰 WALLET SYSTEM
+        // ============================================
+        function showWithdraw() {
+            if (!currentUser.wallet_address) {
+                tg.showPopup({
+                    title: 'Wallet Required',
+                    message: 'Please set your TON wallet address first',
+                    buttons: [{ type: 'ok' }]
+                });
+                setWalletAddress();
                 return;
             }
             
-            if (amount < 2) {
-                alert('Minimum withdrawal is 2 TON');
+            if (currentUser.balance < 2) {
+                tg.showPopup({
+                    title: 'Insufficient Balance',
+                    message: 'Minimum withdrawal is 2 TON. Your balance: ' + currentUser.balance.toFixed(3) + ' TON',
+                    buttons: [{ type: 'ok' }]
+                });
+                return;
+            }
+            
+            document.getElementById('withdrawModal').style.display = 'flex';
+            updateWithdrawalCalculation();
+        }
+
+        function updateWithdrawalCalculation() {
+            const amountInput = document.getElementById('withdrawAmount');
+            if (!amountInput.value) {
+                amountInput.value = Math.max(2, Math.min(10, currentUser.balance || 2)).toFixed(3);
+            }
+            
+            const amount = parseFloat(amountInput.value) || 2;
+            const fee = amount * 0.20;
+            const netAmount = amount - fee;
+            
+            document.getElementById('feeAmount').textContent = fee.toFixed(3);
+            document.getElementById('netAmount').textContent = netAmount.toFixed(3);
+        }
+
+        async function processWithdrawal() {
+            const address = document.getElementById('withdrawAddress').value.trim();
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+            
+            if (!address) {
+                tg.showPopup({
+                    title: 'Error',
+                    message: 'Please enter your TON wallet address',
+                    buttons: [{ type: 'ok' }]
+                });
+                return;
+            }
+            
+            if (!amount || amount < 2) {
+                tg.showPopup({
+                    title: 'Error',
+                    message: 'Minimum withdrawal is 2 TON',
+                    buttons: [{ type: 'ok' }]
+                });
                 return;
             }
             
             if (amount > currentUser.balance) {
-                alert('Insufficient balance');
+                tg.showPopup({
+                    title: 'Insufficient Balance',
+                    message: 'Your balance: ' + currentUser.balance.toFixed(3) + ' TON',
+                    buttons: [{ type: 'ok' }]
+                });
                 return;
             }
             
             const fee = amount * 0.20;
             const netAmount = amount - fee;
             
-            if (confirm(`Withdraw ${amount} TON?\nFee: ${fee.toFixed(3)} TON\nYou receive: ${netAmount.toFixed(3)} TON`)) {
-                try {
-                    // Create withdrawal request
-                    await db.collection('withdrawals').add({
-                        user_id: currentUser.id,
-                        amount: amount,
-                        fee: fee,
-                        net_amount: netAmount,
-                        wallet_address: address,
-                        status: 'pending',
-                        requested_at: new Date().toISOString()
-                    });
-                    
-                    // Update user balance
-                    const userRef = db.collection('users').doc(currentUser.id);
-                    await userRef.update({
-                        balance: firebase.firestore.FieldValue.increment(-amount)
-                    });
-                    
-                    // Update local user
-                    currentUser.balance -= amount;
-                    updateUI();
-                    
-                    alert('✅ Withdrawal request submitted!\nProcessing: 5-30 minutes');
-                    
-                    // Clear form
-                    document.getElementById('walletAddress').value = '';
-                    document.getElementById('amount').value = '';
-                    
-                } catch (error) {
-                    alert('Error: ' + error.message);
+            const confirmMsg = `Withdraw ${amount.toFixed(3)} TON?\n\n` +
+                              `Fee: ${fee.toFixed(3)} TON (20%)\n` +
+                              `You receive: ${netAmount.toFixed(3)} TON\n\n` +
+                              `Address: ${address.substring(0, 20)}...`;
+            
+            tg.showConfirm(confirmMsg, async (confirmed) => {
+                if (confirmed) {
+                    try {
+                        // Update user balance
+                        const updates = {
+                            balance: (currentUser.balance || 0) - amount,
+                            last_active: new Date().toISOString()
+                        };
+                        
+                        await updateUserInFirebase(updates);
+                        if (!db) {
+                            Object.assign(currentUser, updates);
+                            updateUI();
+                        }
+                        
+                        // Create withdrawal record
+                        if (db) {
+                            await db.collection('withdrawals').add({
+                                user_id: currentUser.id,
+                                amount: amount,
+                                fee: fee,
+                                net_amount: netAmount,
+                                wallet_address: address,
+                                status: 'pending',
+                                requested_at: new Date().toISOString()
+                            });
+                        }
+                        
+                        // Show success
+                        tg.showPopup({
+                            title: '✅ Withdrawal Requested',
+                            message: `Withdrawal submitted!\n\n` +
+                                    `Amount: ${amount.toFixed(3)} TON\n` +
+                                    `Fee: ${fee.toFixed(3)} TON\n` +
+                                    `Net: ${netAmount.toFixed(3)} TON\n\n` +
+                                    `Processing time: 5-30 minutes`,
+                            buttons: [{ type: 'ok' }]
+                        });
+                        
+                        closeWithdrawModal();
+                        
+                    } catch (error) {
+                        console.error('❌ Withdrawal error:', error);
+                        tg.showPopup({
+                            title: 'Error',
+                            message: 'Failed to process withdrawal: ' + error.message,
+                            buttons: [{ type: 'ok' }]
+                        });
+                    }
                 }
-            }
+            });
         }
-        
-        // Load tasks from Firestore
-        async function loadTasks() {
-            try {
-                const snapshot = await db.collection('tasks')
-                    .where('status', '==', 'active')
-                    .limit(10)
-                    .get();
-                
-                const tasksList = document.getElementById('tasksList');
-                tasksList.innerHTML = '';
-                
-                snapshot.forEach(doc => {
-                    const task = doc.data();
-                    tasksList.innerHTML += `
-                        <div class="card">
-                            <h4>${task.title}</h4>
-                            <p>${task.description}</p>
-                            <p>Reward: ${task.reward} TON</p>
-                            <button onclick="completeTask('${doc.id}')">Complete Task</button>
-                        </div>
-                    `;
+
+        function showDeposit() {
+            document.getElementById('depositModal').style.display = 'flex';
+        }
+
+        function copyDepositAddress() {
+            const address = document.getElementById('depositAddress').textContent;
+            navigator.clipboard.writeText(address).then(() => {
+                tg.showPopup({
+                    title: 'Copied!',
+                    message: 'TON address copied to clipboard',
+                    buttons: [{ type: 'ok' }]
                 });
-            } catch (error) {
-                console.error('Error loading tasks:', error);
-            }
+            });
         }
-        
-        async function completeTask(taskId) {
-            try {
-                const taskRef = db.collection('tasks').doc(taskId);
-                const taskDoc = await taskRef.get();
-                
-                if (!taskDoc.exists) {
-                    alert('Task not found');
-                    return;
+
+        function setWalletAddress() {
+            tg.showPopup({
+                title: 'Set TON Wallet',
+                message: 'Enter your TON wallet address (starts with UQ or EQ)',
+                buttons: [
+                    {
+                        type: 'default',
+                        text: 'Set Address',
+                        id: 'set_address'
+                    },
+                    {
+                        type: 'cancel'
+                    }
+                ]
+            }, (btnId) => {
+                if (btnId === 'set_address') {
+                    // In production, open input dialog
+                    const address = prompt('Enter your TON wallet address:');
+                    if (address && address.startsWith('UQ') || address.startsWith('EQ')) {
+                        updateUserInFirebase({ wallet_address: address });
+                        if (!db) {
+                            currentUser.wallet_address = address;
+                            updateUI();
+                        }
+                        tg.showPopup({
+                            title: '✅ Wallet Set',
+                            message: 'TON wallet address saved successfully',
+                            buttons: [{ type: 'ok' }]
+                        });
+                    }
                 }
-                
-                const task = taskDoc.data();
-                const reward = task.reward;
-                
-                // Update user
-                const userRef = db.collection('users').doc(currentUser.id);
-                await userRef.update({
-                    balance: firebase.firestore.FieldValue.increment(reward),
-                    total_earned: firebase.firestore.FieldValue.increment(reward),
-                    tasks_completed: firebase.firestore.FieldValue.increment(1)
-                });
-                
-                // Create transaction
-                await db.collection('transactions').add({
-                    user_id: currentUser.id,
-                    type: 'task_completed',
-                    amount: reward,
-                    task_id: taskId,
-                    status: 'completed',
-                    timestamp: new Date().toISOString()
-                });
-                
-                // Update local user
-                currentUser.balance += reward;
-                currentUser.total_earned += reward;
-                currentUser.tasks_completed += 1;
-                
+            });
+        }
+
+        function closeWithdrawModal() {
+            document.getElementById('withdrawModal').style.display = 'none';
+        }
+
+        function closeDepositModal() {
+            document.getElementById('depositModal').style.display = 'none';
+        }
+
+        // ============================================
+        // 🎁 BONUS SYSTEM
+        // ============================================
+        function claimDailyBonus() {
+            const bonus = 0.25;
+            
+            const updates = {
+                balance: (currentUser.balance || 0) + bonus,
+                total_earned: (currentUser.total_earned || 0) + bonus,
+                last_active: new Date().toISOString()
+            };
+            
+            updateUserInFirebase(updates);
+            if (!db) {
+                Object.assign(currentUser, updates);
                 updateUI();
-                
-                alert(`✅ Task completed! Earned ${reward} TON`);
-                
-            } catch (error) {
-                alert('Error: ' + error.message);
+            }
+            
+            showSuccess(bonus, currentUser.balance + bonus);
+        }
+
+        function checkBonuses() {
+            // Check CPM bonus
+            if (currentUser.cpm_clicks >= 10000) {
+                tg.showPopup({
+                    title: '🎉 CPM Bonus!',
+                    message: 'Congratulations! You completed 10,000 clicks and earned 0.25 TON bonus!',
+                    buttons: [{ type: 'ok' }]
+                });
+            }
+            
+            // Check tier bonuses
+            const adsWatched = currentUser.ads_watched || 0;
+            if (adsWatched === 400 || adsWatched === 1000) {
+                tg.showPopup({
+                    title: '🏆 Tier Bonus!',
+                    message: `You reached ${adsWatched} ads! Tier upgraded.`,
+                    buttons: [{ type: 'ok' }]
+                });
             }
         }
-        
-        // Initialize when page loads
+
+        function showReferral() {
+            const refLink = `https://t.me/AdTONX_Bot?start=ref_${currentUser.id}`;
+            
+            tg.showPopup({
+                title: '🤝 Refer & Earn',
+                message: `Earn 10% lifetime commission + 0.005 TON per active referral!\n\nYour link:\n${refLink}`,
+                buttons: [
+                    {
+                        type: 'default',
+                        text: 'Copy Link',
+                        id: 'copy'
+                    },
+                    {
+                        type: 'cancel'
+                    }
+                ]
+            }, (btnId) => {
+                if (btnId === 'copy') {
+                    navigator.clipboard.writeText(refLink).then(() => {
+                        tg.showPopup({
+                            title: 'Copied!',
+                            message: 'Referral link copied to clipboard',
+                            buttons: [{ type: 'ok' }]
+                        });
+                    });
+                }
+            });
+        }
+
+        // ============================================
+        // 🎉 SUCCESS MODAL
+        // ============================================
+        function showSuccess(reward, newBalance) {
+            document.getElementById('rewardAmount').textContent = reward.toFixed(3) + ' TON';
+            document.getElementById('newBalance').textContent = newBalance.toFixed(3) + ' TON';
+            document.getElementById('successModal').style.display = 'flex';
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').style.display = 'none';
+        }
+
+        // ============================================
+        // 📊 TRANSACTIONS
+        // ============================================
+        async function loadTransactions() {
+            // In production, load from Firebase
+            // For demo, show mock transactions
+            const transactions = [
+                { type: 'Ad Watched', amount: '+0.005 TON', time: '2 min ago' },
+                { type: 'Task Completed', amount: '+0.100 TON', time: '1 hour ago' },
+                { type: 'Referral Bonus', amount: '+0.005 TON', time: '3 hours ago' },
+                { type: 'Ad Watched', amount: '+0.005 TON', time: '5 hours ago' }
+            ];
+            
+            const list = document.getElementById('transactionList');
+            list.innerHTML = transactions.map(tx => `
+                <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee;">
+                    <div>
+                        <strong>${tx.type}</strong>
+                        <div style="font-size: 0.85rem; color: #666;">${tx.time}</div>
+                    </div>
+                    <div style="color: #2ecc71; font-weight: 600;">${tx.amount}</div>
+                </div>
+            `).join('');
+        }
+
+        // ============================================
+        // 🏆 LEADERBOARD
+        // ============================================
+        function showLeaderboard() {
+            tg.showPopup({
+                title: '🏆 Weekly Leaderboard',
+                message: 'Top 100 ad watchers get 5 TON reward!\n\n🥇 Top 10: 2 TON each\n🏆 Next 90: 3 TON shared\n\nYour position: #245',
+                buttons: [{ type: 'ok' }]
+            });
+        }
+
+        // ============================================
+        // 🛠️ UTILITY FUNCTIONS
+        // ============================================
+        function showCreateTask() {
+            tg.showPopup({
+                title: 'Create Paid Task',
+                message: 'Coming soon! Create tasks to promote your content.',
+                buttons: [{ type: 'ok' }]
+            });
+        }
+
+        // ============================================
+        // 🚀 START THE APP
+        // ============================================
         window.onload = initApp;
     </script>
 </body>
 </html>
+                      
