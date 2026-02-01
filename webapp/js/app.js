@@ -520,4 +520,5 @@ function closeSuccessModal() {
 
 function requestWithdrawal() {
     if (app) app.requestWithdrawal();
+
 }
